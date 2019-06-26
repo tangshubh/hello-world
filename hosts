@@ -1,0 +1,69 @@
+[OSEv3:children]
+masters
+nodes
+etcd
+lb
+nfs
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+# # SSH user, this user should allow ssh based auth without requiring a password
+ansible_ssh_user=root
+openshift_deployment_type=origin
+openshift_image_tag=v3.11
+# # If ansible_ssh_user is not root, ansible_become must be set to true
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider'}]
+openshift_disable_check=memory_availability,disk_availability,docker_image_availability
+
+os_sdn_network_plugin_name=redhat/openshift-ovs-multitenant
+
+# # new 2018-11--5 14:40:00
+openshift_hosted_router_replicas=1
+openshift_hosted_registry_replicas=1
+openshift_master_cluster_hostname=lb
+
+openshift_master_cluster_public_hostname=lb
+
+openshift_master_default_subdomain=apps.example.com
+openshift_master_default_subdomain=apps.lb.example.opentlc.com
+openshift_master_cluster_method=native
+containerized=false
+# # false
+ansible_service_broker_install=false
+openshift_enable_service_catalog=false
+template_service_broker_install=false
+openshift_logging_install_logging=false
+
+# # registry passwd
+# #oreg_url=172.16.37.12:5000/openshift3/ose-${component}:${version}
+# #openshift_examples_modify_imagestreams=true
+#
+# # docker config
+# #openshift_docker_additional_registries=172.16.37.12:5000,172.30.0.0/16
+# #openshift_docker_insecure_registries=172.16.37.12:5000,172.30.0.0/16
+# #openshift_docker_blocked_registries
+openshift_docker_options="--log-driver json-file --log-opt max-size=1M --log-opt max-file=3"
+
+# # host group for masters
+
+[lb]
+lb
+
+[masters]
+master1
+master2
+master3
+
+[etcd]
+master1
+master2
+master3
+
+[nodes]
+master1  openshift_node_group_name='node-config-master-infra'
+master2  openshift_node_group_name='node-config-master-infra'
+master3  openshift_node_group_name='node-config-master-infra'
+node1    openshift_node_group_name='node-config-compute'
+node2    openshift_node_group_name='node-config-compute'
+
+[nfs]
+lb openshift_hostname='lb'
